@@ -681,14 +681,13 @@ input[type="range"]::-webkit-slider-thumb{
   :root{--sidebar-w:200px;}
 }
 @media(max-width:600px){
-  :root{--sidebar-w:0px;}
-  body{flex-direction:column;}
+  :root{--sidebar-w:100%;}
+  body{flex-direction:column !important;height:auto !important;}
   .sidebar{
     width:100% !important;
-    height:62px !important;
-    position:sticky !important;
-    top:0 !important;
-    z-index:100 !important;
+    min-width:100% !important;
+    max-width:100% !important;
+    height:64px !important;
     flex-direction:row !important;
     overflow-x:auto !important;
     overflow-y:hidden !important;
@@ -697,10 +696,12 @@ input[type="range"]::-webkit-slider-thumb{
     border-bottom:2px solid var(--pink-200);
     display:flex !important;
     align-items:center !important;
+    flex-shrink:0 !important;
+    box-shadow:0 2px 12px rgba(255,107,157,.15) !important;
   }
-  .sidebar::after{display:none;}
+  .sidebar::after{display:none !important;}
   .sidebar-header{display:none !important;}
-  .sidebar-nav{flex-direction:row !important;gap:4px !important;flex:1;overflow-x:auto;padding:0;margin:0;}
+  .sidebar-nav{flex-direction:row !important;gap:2px !important;flex:1;overflow-x:auto;padding:0;margin:0;}
   .nav-item{
     flex-direction:column !important;
     padding:6px 8px !important;
@@ -708,16 +709,14 @@ input[type="range"]::-webkit-slider-thumb{
     min-width:auto !important;
     flex-shrink:0 !important;
     border-radius:10px !important;
-    position:relative;
+    position:relative !important;
+    margin:4px 0 !important;
   }
   .nav-item .icon{font-size:18px !important;margin-bottom:2px !important;}
   .nav-item .text{font-size:10px !important;white-space:nowrap;}
-  .nav-item .badge{position:absolute;top:2px;right:6px;}
+  .nav-item .badge{position:absolute !important;top:2px !important;right:2px !important;font-size:9px;padding:0 4px;}
   .sidebar-footer{display:none !important;}
-  .main{margin-left:0 !important;padding:14px !important;width:100%;}
-  .daily-reco-section{padding:14px !important;}
-  .reco-item{flex-wrap:wrap;}
-  .reco-add-btn{margin-top:6px;align-self:flex-end;}
+  .main{height:auto !important;flex:1 !important;padding:14px !important;width:100%;overflow-y:visible;}
 }
 /* 自定义图标 */
 .nav-item .icon img, .nav-item img.icon{
