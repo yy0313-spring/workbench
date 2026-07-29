@@ -687,34 +687,49 @@ input[type="range"]::-webkit-slider-thumb{
     width:100% !important;
     min-width:100% !important;
     max-width:100% !important;
-    height:64px !important;
-    flex-direction:row !important;
-    overflow-x:auto !important;
-    overflow-y:hidden !important;
-    padding:0 8px !important;
+    height:auto !important;
+    flex-direction:column !important;
+    overflow:visible !important;
+    padding:8px !important;
     border-right:none !important;
     border-bottom:2px solid var(--pink-200);
-    display:flex !important;
-    align-items:center !important;
+    display:block !important;
+    align-items:stretch !important;
     flex-shrink:0 !important;
     box-shadow:0 2px 12px rgba(255,107,157,.15) !important;
   }
   .sidebar::after{display:none !important;}
   .sidebar-header{display:none !important;}
-  .sidebar-nav{flex-direction:row !important;gap:2px !important;flex:1;overflow-x:auto;padding:0;margin:0;}
+  .nav-list{
+    display:grid !important;
+    grid-template-columns:repeat(4,1fr) !important;
+    gap:6px !important;
+    padding:0 !important;
+    margin:0 !important;
+    overflow:visible !important;
+  }
+  .nav-list li{
+    margin:0 !important;
+    list-style:none !important;
+  }
   .nav-item{
     flex-direction:column !important;
-    padding:6px 8px !important;
+    padding:8px 4px !important;
     font-size:11px !important;
     min-width:auto !important;
     flex-shrink:0 !important;
     border-radius:10px !important;
     position:relative !important;
-    margin:4px 0 !important;
+    margin:0 !important;
+    gap:2px !important;
+    text-align:center !important;
+    justify-content:center !important;
+    align-items:center !important;
+    background:rgba(255,255,255,.4) !important;
   }
-  .nav-item .icon{font-size:18px !important;margin-bottom:2px !important;}
-  .nav-item .text{font-size:10px !important;white-space:nowrap;}
-  .nav-item .badge{position:absolute !important;top:2px !important;right:2px !important;font-size:9px;padding:0 4px;}
+  .nav-item .text{font-size:10px !important;white-space:nowrap;display:block !important;}
+  .nav-item .icon{font-size:18px !important;margin:0 !important;width:auto !important;}
+  .nav-item .badge{position:absolute !important;top:2px !important;right:6px !important;font-size:9px;padding:0 4px;margin:0 !important;}
   .sidebar-footer{display:none !important;}
   .main{height:auto !important;flex:1 !important;padding:14px !important;width:100%;overflow-y:visible;}
 }
