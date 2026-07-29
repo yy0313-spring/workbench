@@ -715,6 +715,25 @@ input[type="range"]::-webkit-slider-thumb{
 }
 .dashboard-hero{position:relative;}
 .dashboard-hero.with-avatar{padding-right:160px;}
+/* ==================== 每日推荐（云端推送）==================== */
+.daily-reco-section{background:linear-gradient(135deg,#fff0f5,#ffe4ec);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:16px;border:2px dashed var(--pink-300);position:relative;}
+.daily-reco-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:15px;font-weight:700;color:var(--pink-600);}
+.daily-reco-header .reco-date{margin-left:auto;font-size:11px;font-weight:400;color:var(--text-light);}
+.daily-reco-header .reco-badge{background:linear-gradient(135deg,var(--pink-400),var(--pink-500));color:#fff;font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;}
+.reco-item{background:rgba(255,255,255,.7);border:1.5px solid var(--pink-100);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;transition:all .3s ease;}
+.reco-item:hover{border-color:var(--pink-300);background:#fff;box-shadow:0 2px 8px rgba(255,107,157,.15);}
+.reco-item .reco-icon{font-size:20px;flex-shrink:0;}
+.reco-item .reco-body{flex:1;min-width:0;}
+.reco-item .reco-title{font-size:14px;font-weight:700;color:var(--text);}
+.reco-item .reco-desc{font-size:12px;color:var(--text-light);margin-top:2px;line-height:1.5;}
+.reco-item .reco-meta{font-size:11px;color:var(--pink-500);margin-top:2px;font-weight:600;}
+.reco-add-btn{background:var(--pink-100);color:var(--pink-600);border:none;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;font-family:inherit;transition:all .3s ease;white-space:nowrap;}
+.reco-add-btn:hover{background:var(--pink-400);color:#fff;}
+.reco-loading{text-align:center;padding:16px;color:var(--text-light);font-size:13px;}
+.reco-video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+.reco-video-card{background:rgba(255,255,255,.7);border:1.5px solid var(--pink-100);border-radius:12px;padding:10px;transition:all .3s ease;}
+.reco-video-card:hover{border-color:var(--pink-300);background:#fff;transform:translateY(-2px);box-shadow:0 4px 12px rgba(255,107,157,.15);}
+.reco-video-card .reco-thumb{width:100%;height:50px;background:linear-gradient(135deg,var(--pink-200),var(--pink-300));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:6px;}
 </style>
 </head>
 <body>
@@ -861,6 +880,15 @@ input[type="range"]::-webkit-slider-thumb{
     <button class="btn-primary" onclick="addWord()">添加单词</button>
   </div>
 
+  <div class="daily-reco-section" id="reco-english" style="display:none;">
+    <div class="daily-reco-header">
+      <span>🌟 今日推荐单词</span>
+      <span class="reco-badge">每日推送</span>
+      <span class="reco-date" id="reco-english-date"></span>
+    </div>
+    <div id="reco-english-list"></div>
+  </div>
+
   <div class="card">
     <h3>📝 单词本</h3>
     <div id="wordList"></div>
@@ -886,6 +914,15 @@ input[type="range"]::-webkit-slider-thumb{
     </div>
     <textarea class="input-field" id="readNote" placeholder="读书笔记/摘抄 (可选)"></textarea>
     <div style="margin-top:10px;"><button class="btn-primary" onclick="addReading()">记录阅读</button></div>
+  </div>
+
+  <div class="daily-reco-section" id="reco-reading" style="display:none;">
+    <div class="daily-reco-header">
+      <span>🌟 今日推荐阅读</span>
+      <span class="reco-badge">每日推送</span>
+      <span class="reco-date" id="reco-reading-date"></span>
+    </div>
+    <div id="reco-reading-list"></div>
   </div>
 
   <div class="card">
@@ -1031,6 +1068,15 @@ input[type="range"]::-webkit-slider-thumb{
     <div style="margin-top:10px;"><button class="btn-primary" onclick="addFinance()">保存笔记</button></div>
   </div>
 
+  <div class="daily-reco-section" id="reco-finance" style="display:none;">
+    <div class="daily-reco-header">
+      <span>🌟 今日理财知识</span>
+      <span class="reco-badge">每日推送</span>
+      <span class="reco-date" id="reco-finance-date"></span>
+    </div>
+    <div id="reco-finance-list"></div>
+  </div>
+
   <div class="card">
     <h3>📒 理财笔记</h3>
     <div id="finList"></div>
@@ -1065,6 +1111,15 @@ input[type="range"]::-webkit-slider-thumb{
       </select>
     </div>
     <button class="btn-primary" onclick="addMedia()">添加计划</button>
+  </div>
+
+  <div class="daily-reco-section" id="reco-media" style="display:none;">
+    <div class="daily-reco-header">
+      <span>🌟 今日选题推荐</span>
+      <span class="reco-badge">每日推送</span>
+      <span class="reco-date" id="reco-media-date"></span>
+    </div>
+    <div id="reco-media-list"></div>
   </div>
 
   <div class="card">
@@ -1107,6 +1162,15 @@ input[type="range"]::-webkit-slider-thumb{
       </div>
     </div>
     <div style="margin-top:10px;"><button class="btn-primary" onclick="addVideo()">保存记录</button></div>
+  </div>
+
+  <div class="daily-reco-section" id="reco-video" style="display:none;">
+    <div class="daily-reco-header">
+      <span>🌟 今日爆款案例</span>
+      <span class="reco-badge">每日推送</span>
+      <span class="reco-date" id="reco-video-date"></span>
+    </div>
+    <div class="reco-video-grid" id="reco-video-list"></div>
   </div>
 
   <div class="card">
@@ -2072,6 +2136,7 @@ function renderPage(page){
     case 'review':renderReview();break;
     case 'punch':renderCalendar();break;
   }
+  if(dailyData) renderDailyReco();
 }
 
 /* ==================== 图标管理 ==================== */
@@ -2258,10 +2323,214 @@ function renderAll(){
   renderCalendar();
 }
 
+/* ==================== 每日推荐（云端推送）==================== */
+let dailyData=null;
+
+async function loadDailyData(){
+  try{
+    const resp=await fetch('daily-data.json?t='+Date.now());
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    dailyData=await resp.json();
+    renderDailyReco();
+  }catch(e){
+    console.log('[DailyReco] 加载失败，使用兜底内容:',e.message);
+    dailyData=getFallbackDailyData();
+    renderDailyReco();
+  }
+}
+
+function renderDailyReco(){
+  if(!dailyData){
+    ['english','reading','finance','media','video'].forEach(cat=>{
+      const sec=document.getElementById('reco-'+cat);
+      if(sec){
+        sec.style.display='block';
+        document.getElementById('reco-'+cat+'-list').innerHTML='<div class="reco-loading">加载今日推荐中...</div>';
+      }
+    });
+    return;
+  }
+
+  const dataDate=dailyData.date||todayStr();
+
+  /* 英语推荐 */
+  if(dailyData.words&&dailyData.words.length>0){
+    const sec=document.getElementById('reco-english');
+    if(sec){
+      sec.style.display='block';
+      document.getElementById('reco-english-date').textContent=dataDate;
+      document.getElementById('reco-english-list').innerHTML=
+        dailyData.words.map((w,i)=>`<div class="reco-item">
+          <div class="reco-icon">🔤</div>
+          <div class="reco-body">
+            <div class="reco-title">${esc(w.word)}</div>
+            <div class="reco-desc">${esc(w.trans)}</div>
+          </div>
+          <button class="reco-add-btn" onclick="addRecoWord(${i})">加入单词本</button>
+        </div>`).join('');
+    }
+  }
+
+  /* 阅读推荐 */
+  if(dailyData.readings&&dailyData.readings.length>0){
+    const sec=document.getElementById('reco-reading');
+    if(sec){
+      sec.style.display='block';
+      document.getElementById('reco-reading-date').textContent=dataDate;
+      document.getElementById('reco-reading-list').innerHTML=
+        dailyData.readings.map((r,i)=>`<div class="reco-item">
+          <div class="reco-icon">📚</div>
+          <div class="reco-body">
+            <div class="reco-title">${esc(r.book)}</div>
+            <div class="reco-desc">${esc(r.note)}</div>
+            <div class="reco-meta">推荐阅读 ${r.pages} 页</div>
+          </div>
+          <button class="reco-add-btn" onclick="addRecoReading(${i})">记录阅读</button>
+        </div>`).join('');
+    }
+  }
+
+  /* 理财推荐 */
+  if(dailyData.finances&&dailyData.finances.length>0){
+    const sec=document.getElementById('reco-finance');
+    if(sec){
+      sec.style.display='block';
+      document.getElementById('reco-finance-date').textContent=dataDate;
+      document.getElementById('reco-finance-list').innerHTML=
+        dailyData.finances.map((f,i)=>`<div class="reco-item">
+          <div class="reco-icon">${f.category.split(' ')[0]}</div>
+          <div class="reco-body">
+            <div class="reco-title">${esc(f.title)}</div>
+            <div class="reco-desc">${esc(f.content).substring(0,120)}${f.content.length>120?'...':''}</div>
+            <div class="reco-meta">${f.category}</div>
+          </div>
+          <button class="reco-add-btn" onclick="addRecoFinance(${i})">保存笔记</button>
+        </div>`).join('');
+    }
+  }
+
+  /* 自媒体推荐 */
+  if(dailyData.medias&&dailyData.medias.length>0){
+    const sec=document.getElementById('reco-media');
+    if(sec){
+      sec.style.display='block';
+      document.getElementById('reco-media-date').textContent=dataDate;
+      document.getElementById('reco-media-list').innerHTML=
+        dailyData.medias.map((m,i)=>`<div class="reco-item">
+          <div class="reco-icon">${m.platform.split(' ')[0]}</div>
+          <div class="reco-body">
+            <div class="reco-title">${esc(m.title)}</div>
+            <div class="reco-meta">${m.platform} · ${m.status}</div>
+          </div>
+          <button class="reco-add-btn" onclick="addRecoMedia(${i})">加入计划</button>
+        </div>`).join('');
+    }
+  }
+
+  /* 视频推荐 */
+  if(dailyData.videos&&dailyData.videos.length>0){
+    const sec=document.getElementById('reco-video');
+    if(sec){
+      sec.style.display='block';
+      document.getElementById('reco-video-date').textContent=dataDate;
+      document.getElementById('reco-video-list').innerHTML=
+        dailyData.videos.map((v,i)=>{
+          const stars='★'.repeat(v.stars)+'☆'.repeat(5-v.stars);
+          return `<div class="reco-video-card">
+            <div class="reco-thumb">${v.platform.split(' ')[0]}</div>
+            <div class="reco-title" style="font-size:13px;margin-bottom:4px;">${esc(v.title)}</div>
+            <div class="reco-desc">${v.platform} · ${esc(v.creator)}</div>
+            <div class="reco-meta">▶️ ${fmtNum(v.views)} · ❤️ ${fmtNum(v.likes)} · ⭐ ${fmtNum(v.collects)}</div>
+            <div style="color:#FFD93D;font-size:13px;margin:4px 0;">${stars}</div>
+            <div class="reco-desc" style="margin-top:4px;">${esc(v.analysis).substring(0,80)}${v.analysis.length>80?'...':''}</div>
+            <button class="reco-add-btn" style="margin-top:6px;" onclick="addRecoVideo(${i})">加入视频库</button>
+          </div>`;
+        }).join('');
+    }
+  }
+}
+
+/* 一键将推荐内容添加到用户数据 */
+function addRecoWord(i){
+  const w=dailyData.words[i];
+  if(store.words.some(x=>x.word===w.word&&x.date===todayStr())){alert('这个单词今天已经添加过了~');return;}
+  store.words.unshift({word:w.word,trans:w.trans,date:todayStr(),ts:Date.now()});
+  saveStore();renderEnglish();renderDashboard();
+  alert('已加入单词本！🎀');
+}
+function addRecoReading(i){
+  const r=dailyData.readings[i];
+  store.readings.unshift({book:r.book,pages:r.pages,note:r.note,date:todayStr(),ts:Date.now()});
+  saveStore();renderReading();renderDashboard();
+  alert('已记录阅读！📖');
+}
+function addRecoFinance(i){
+  const f=dailyData.finances[i];
+  store.finances.unshift({title:f.title,category:f.category,content:f.content,date:todayStr(),ts:Date.now()});
+  saveStore();renderFinance();renderDashboard();
+  alert('已保存笔记！💰');
+}
+function addRecoMedia(i){
+  const m=dailyData.medias[i];
+  store.medias.unshift({title:m.title,platform:m.platform,status:m.status,date:todayStr(),ts:Date.now()});
+  saveStore();renderMedia();
+  alert('已加入计划！📱');
+}
+function addRecoVideo(i){
+  const v=dailyData.videos[i];
+  store.videos.unshift({title:v.title,creator:v.creator,platform:v.platform,likes:v.likes,views:v.views,collects:v.collects,analysis:v.analysis,stars:v.stars,date:todayStr(),ts:Date.now()});
+  saveStore();renderVideo();
+  alert('已加入视频库！🎬');
+}
+
+/* 兜底数据 */
+function getFallbackDailyData(){
+  const t=todayStr(),ts=Date.now();
+  return{
+    date:t,
+    words:[
+      {word:'resilience',trans:'n. 韧性；恢复力',date:t,ts:ts},
+      {word:'serendipity',trans:'n. 意外的发现；机缘巧合',date:t,ts:ts+1},
+      {word:'ephemeral',trans:'adj. 短暂的；瞬息的',date:t,ts:ts+2},
+      {word:'ubiquitous',trans:'adj. 无处不在的',date:t,ts:ts+3},
+      {word:'paradigm',trans:'n. 范例；范式',date:t,ts:ts+4},
+    ],
+    readings:[
+      {book:'《小王子》- 圣埃克苏佩里',pages:30,note:'所有的大人都曾经是小孩，虽然，只有少数的人记得。',date:t,ts:ts},
+      {book:'《活着》- 余华',pages:40,note:'人是为活着本身而活着。',date:t,ts:ts+1},
+      {book:'《百年孤独》- 马尔克斯',pages:50,note:'过去都是假的，回忆是一条没有归途的路。',date:t,ts:ts+2},
+      {book:'《追风筝的人》- 卡勒德·胡赛尼',pages:35,note:'为你，千千万万遍。',date:t,ts:ts+3},
+      {book:'《月亮与六便士》- 毛姆',pages:45,note:'满地都是六便士，他却抬头看见了月亮。',date:t,ts:ts+4},
+    ],
+    finances:[
+      {title:'基金定投策略',category:'📈 基金',content:'定期定额投资（DCA）是在固定时间以固定金额投资同一基金。优点：摊平成本、克服人性弱点。核心原则：止盈不止损。',date:t,ts:ts},
+      {title:'复利的魔力',category:'💡 心得',content:'每月投资1000元，年化8%，30年后约150万元。越早开始越好。',date:t,ts:ts+1},
+      {title:'紧急备用金',category:'🏦 存款',content:'储备3-6个月生活开支作为紧急备用金，放在货币基金或活期存款中。',date:t,ts:ts+2},
+      {title:'资产配置原则',category:'📊 其他',content:'不要把鸡蛋放在一个篮子里。股票比例=100-年龄。',date:t,ts:ts+3},
+      {title:'指数基金入门',category:'📈 基金',content:'巴菲特推荐指数基金。沪深300、标普500等宽基指数基金费率低、分散风险。',date:t,ts:ts+4},
+    ],
+    medias:[
+      {title:'一人居的100个生活技巧',platform:'📕 小红书',status:'📝 待创作',date:t,ts:ts},
+      {title:'30天英语挑战',platform:'🎵 抖音',status:'📝 待创作',date:t,ts:ts+1},
+      {title:'程序员副业指南',platform:'📺 B站',status:'📝 待创作',date:t,ts:ts+2},
+      {title:'理财小白入门系列',platform:'📮 公众号',status:'📝 待创作',date:t,ts:ts+3},
+      {title:'手机拍出电影感',platform:'🎬 视频号',status:'📝 待创作',date:t,ts:ts+4},
+    ],
+    videos:[
+      {title:'一个普通人的早起30天改变',creator:'生活记录类',platform:'🎵 抖音',likes:520000,views:8500000,collects:43000,analysis:'选题：切中自律共鸣。节奏：前3秒展示对比。文案：用数字量化结果。',stars:5,date:t,ts:ts},
+      {title:'5分钟学会做红烧肉',creator:'美食教程类',platform:'📕 小红书',likes:380000,views:6200000,collects:89000,analysis:'选题：高搜索量+时间承诺。视觉：俯拍+特写交替。',stars:4,date:t,ts:ts+1},
+      {title:'我用100天学会了画画',creator:'成长挑战类',platform:'📺 B站',likes:280000,views:4500000,collects:56000,analysis:'选题：长期挑战+可见进步。叙事：从零基础到完成作品。',stars:5,date:t,ts:ts+2},
+      {title:'为什么你总是存不下钱',creator:'知识科普类',platform:'🎬 视频号',likes:420000,views:7100000,collects:67000,analysis:'选题：痛点直击。结构：提出问题-分析原因-给出方案。',stars:4,date:t,ts:ts+3},
+      {title:'独居女生的安全感好物',creator:'好物推荐类',platform:'📕 小红书',likes:610000,views:9300000,collects:120000,analysis:'选题：精准人群+情绪需求。展示：场景化使用演示。',stars:5,date:t,ts:ts+4},
+    ]
+  };
+}
+
 /* 初始化 */
 renderAll();
 applyIcons();
 loadIconInputs();
+loadDailyData();
 </script>
 </body>
 </html>
