@@ -933,15 +933,6 @@ input[type="range"]::-webkit-slider-thumb{
     <button class="btn-primary" onclick="addWord()">添加单词</button>
   </div>
 
-  <div class="daily-reco-section" id="reco-english" style="display:none;">
-    <div class="daily-reco-header">
-      <span>🌟 今日推荐单词</span>
-      <span class="reco-badge">每日推送</span>
-      <span class="reco-date" id="reco-english-date"></span>
-    </div>
-    <div id="reco-english-list"></div>
-  </div>
-
   <div class="card">
     <h3>📝 单词本</h3>
     <div id="wordList"></div>
@@ -967,15 +958,6 @@ input[type="range"]::-webkit-slider-thumb{
     </div>
     <textarea class="input-field" id="readNote" placeholder="读书笔记/摘抄 (可选)"></textarea>
     <div style="margin-top:10px;"><button class="btn-primary" onclick="addReading()">记录阅读</button></div>
-  </div>
-
-  <div class="daily-reco-section" id="reco-reading" style="display:none;">
-    <div class="daily-reco-header">
-      <span>🌟 今日推荐阅读</span>
-      <span class="reco-badge">每日推送</span>
-      <span class="reco-date" id="reco-reading-date"></span>
-    </div>
-    <div id="reco-reading-list"></div>
   </div>
 
   <div class="card">
@@ -1121,15 +1103,6 @@ input[type="range"]::-webkit-slider-thumb{
     <div style="margin-top:10px;"><button class="btn-primary" onclick="addFinance()">保存笔记</button></div>
   </div>
 
-  <div class="daily-reco-section" id="reco-finance" style="display:none;">
-    <div class="daily-reco-header">
-      <span>🌟 今日理财知识</span>
-      <span class="reco-badge">每日推送</span>
-      <span class="reco-date" id="reco-finance-date"></span>
-    </div>
-    <div id="reco-finance-list"></div>
-  </div>
-
   <div class="card">
     <h3>📒 理财笔记</h3>
     <div id="finList"></div>
@@ -1164,15 +1137,6 @@ input[type="range"]::-webkit-slider-thumb{
       </select>
     </div>
     <button class="btn-primary" onclick="addMedia()">添加计划</button>
-  </div>
-
-  <div class="daily-reco-section" id="reco-media" style="display:none;">
-    <div class="daily-reco-header">
-      <span>🌟 今日选题推荐</span>
-      <span class="reco-badge">每日推送</span>
-      <span class="reco-date" id="reco-media-date"></span>
-    </div>
-    <div id="reco-media-list"></div>
   </div>
 
   <div class="card">
@@ -1215,15 +1179,6 @@ input[type="range"]::-webkit-slider-thumb{
       </div>
     </div>
     <div style="margin-top:10px;"><button class="btn-primary" onclick="addVideo()">保存记录</button></div>
-  </div>
-
-  <div class="daily-reco-section" id="reco-video" style="display:none;">
-    <div class="daily-reco-header">
-      <span>🌟 今日爆款案例</span>
-      <span class="reco-badge">每日推送</span>
-      <span class="reco-date" id="reco-video-date"></span>
-    </div>
-    <div class="reco-video-grid" id="reco-video-list"></div>
   </div>
 
   <div class="card">
@@ -1422,7 +1377,8 @@ function loadStore(){
     punch:{ dates:[], lastDate:null, streak:0 },
     quote:{ date:null, cn:'', en:'' },
     selectedMood:null, selectedStars:0,
-    icons:{logo:'',avatar:'',nav:{}}
+    icons:{logo:'',avatar:'',nav:{}},
+    dailySynced:{}
   };
 }
 function saveStore(){ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }
@@ -2189,7 +2145,6 @@ function renderPage(page){
     case 'review':renderReview();break;
     case 'punch':renderCalendar();break;
   }
-  if(dailyData) renderDailyReco();
 }
 
 /* ==================== 图标管理 ==================== */
@@ -2376,7 +2331,7 @@ function renderAll(){
   renderCalendar();
 }
 
-/* ==================== 每日推荐（云端推送）==================== */
+/* ==================== 每日自动更新（云端推送 → 自动合并）==================== */
 let dailyData=null;
 
 async function loadDailyData(){
@@ -2384,156 +2339,85 @@ async function loadDailyData(){
     const resp=await fetch('daily-data.json?t='+Date.now());
     if(!resp.ok) throw new Error('HTTP '+resp.status);
     dailyData=await resp.json();
-    renderDailyReco();
   }catch(e){
-    console.log('[DailyReco] 加载失败，使用兜底内容:',e.message);
+    console.log('[DailySync] 网络加载失败，使用兜底内容:',e.message);
     dailyData=getFallbackDailyData();
-    renderDailyReco();
   }
+  /* 自动合并到用户数据 */
+  mergeDailyData();
 }
 
-function renderDailyReco(){
-  if(!dailyData){
-    ['english','reading','finance','media','video'].forEach(cat=>{
-      const sec=document.getElementById('reco-'+cat);
-      if(sec){
-        sec.style.display='block';
-        document.getElementById('reco-'+cat+'-list').innerHTML='<div class="reco-loading">加载今日推荐中...</div>';
+/* 将每日内容自动注入用户数据（每天只注入一次） */
+function mergeDailyData(){
+  if(!dailyData) return;
+  const today=todayStr();
+  // 确保 store 有 dailySynced 结构
+  if(!store.dailySynced) store.dailySynced={};
+  const synced=store.dailySynced[today]||{english:false,reading:false,finance:false,media:false,video:false};
+
+  let changed=false;
+
+  /* 英语单词 */
+  if(dailyData.words&&dailyData.words.length>0&&!synced.english){
+    dailyData.words.forEach(w=>{
+      // 避免重复
+      if(!store.words.some(x=>x.word===w.word&&x.date===today)){
+        store.words.unshift({word:w.word,trans:w.trans,date:today,ts:Date.now()+Math.random()});
       }
     });
-    return;
-  }
-
-  const dataDate=dailyData.date||todayStr();
-
-  /* 英语推荐 */
-  if(dailyData.words&&dailyData.words.length>0){
-    const sec=document.getElementById('reco-english');
-    if(sec){
-      sec.style.display='block';
-      document.getElementById('reco-english-date').textContent=dataDate;
-      document.getElementById('reco-english-list').innerHTML=
-        dailyData.words.map((w,i)=>`<div class="reco-item">
-          <div class="reco-icon">🔤</div>
-          <div class="reco-body">
-            <div class="reco-title">${esc(w.word)}</div>
-            <div class="reco-desc">${esc(w.trans)}</div>
-          </div>
-          <button class="reco-add-btn" onclick="addRecoWord(${i})">加入单词本</button>
-        </div>`).join('');
-    }
+    synced.english=true;changed=true;
   }
 
   /* 阅读推荐 */
-  if(dailyData.readings&&dailyData.readings.length>0){
-    const sec=document.getElementById('reco-reading');
-    if(sec){
-      sec.style.display='block';
-      document.getElementById('reco-reading-date').textContent=dataDate;
-      document.getElementById('reco-reading-list').innerHTML=
-        dailyData.readings.map((r,i)=>`<div class="reco-item">
-          <div class="reco-icon">📚</div>
-          <div class="reco-body">
-            <div class="reco-title">${esc(r.book)}</div>
-            <div class="reco-desc">${esc(r.note)}</div>
-            <div class="reco-meta">推荐阅读 ${r.pages} 页</div>
-          </div>
-          <button class="reco-add-btn" onclick="addRecoReading(${i})">记录阅读</button>
-        </div>`).join('');
-    }
+  if(dailyData.readings&&dailyData.readings.length>0&&!synced.reading){
+    dailyData.readings.forEach(r=>{
+      if(!store.readings.some(x=>x.book===r.book&&x.date===today)){
+        store.readings.unshift({book:r.book,pages:r.pages,note:r.note,date:today,ts:Date.now()+Math.random()});
+      }
+    });
+    synced.reading=true;changed=true;
   }
 
-  /* 理财推荐 */
-  if(dailyData.finances&&dailyData.finances.length>0){
-    const sec=document.getElementById('reco-finance');
-    if(sec){
-      sec.style.display='block';
-      document.getElementById('reco-finance-date').textContent=dataDate;
-      document.getElementById('reco-finance-list').innerHTML=
-        dailyData.finances.map((f,i)=>`<div class="reco-item">
-          <div class="reco-icon">${f.category.split(' ')[0]}</div>
-          <div class="reco-body">
-            <div class="reco-title">${esc(f.title)}</div>
-            <div class="reco-desc">${esc(f.content).substring(0,120)}${f.content.length>120?'...':''}</div>
-            <div class="reco-meta">${f.category}</div>
-          </div>
-          <button class="reco-add-btn" onclick="addRecoFinance(${i})">保存笔记</button>
-        </div>`).join('');
-    }
+  /* 理财知识 */
+  if(dailyData.finances&&dailyData.finances.length>0&&!synced.finance){
+    dailyData.finances.forEach(f=>{
+      if(!store.finances.some(x=>x.title===f.title&&x.date===today)){
+        store.finances.unshift({title:f.title,category:f.category,content:f.content,date:today,ts:Date.now()+Math.random()});
+      }
+    });
+    synced.finance=true;changed=true;
   }
 
-  /* 自媒体推荐 */
-  if(dailyData.medias&&dailyData.medias.length>0){
-    const sec=document.getElementById('reco-media');
-    if(sec){
-      sec.style.display='block';
-      document.getElementById('reco-media-date').textContent=dataDate;
-      document.getElementById('reco-media-list').innerHTML=
-        dailyData.medias.map((m,i)=>`<div class="reco-item">
-          <div class="reco-icon">${m.platform.split(' ')[0]}</div>
-          <div class="reco-body">
-            <div class="reco-title">${esc(m.title)}</div>
-            <div class="reco-meta">${m.platform} · ${m.status}</div>
-          </div>
-          <button class="reco-add-btn" onclick="addRecoMedia(${i})">加入计划</button>
-        </div>`).join('');
-    }
+  /* 自媒体选题 */
+  if(dailyData.medias&&dailyData.medias.length>0&&!synced.media){
+    dailyData.medias.forEach(m=>{
+      if(!store.medias.some(x=>x.title===m.title&&x.date===today)){
+        store.medias.unshift({title:m.title,platform:m.platform,status:m.status,date:today,ts:Date.now()+Math.random()});
+      }
+    });
+    synced.media=true;changed=true;
   }
 
-  /* 视频推荐 */
-  if(dailyData.videos&&dailyData.videos.length>0){
-    const sec=document.getElementById('reco-video');
-    if(sec){
-      sec.style.display='block';
-      document.getElementById('reco-video-date').textContent=dataDate;
-      document.getElementById('reco-video-list').innerHTML=
-        dailyData.videos.map((v,i)=>{
-          const stars='★'.repeat(v.stars)+'☆'.repeat(5-v.stars);
-          return `<div class="reco-video-card">
-            <div class="reco-thumb">${v.platform.split(' ')[0]}</div>
-            <div class="reco-title" style="font-size:13px;margin-bottom:4px;">${esc(v.title)}</div>
-            <div class="reco-desc">${v.platform} · ${esc(v.creator)}</div>
-            <div class="reco-meta">▶️ ${fmtNum(v.views)} · ❤️ ${fmtNum(v.likes)} · ⭐ ${fmtNum(v.collects)}</div>
-            <div style="color:#FFD93D;font-size:13px;margin:4px 0;">${stars}</div>
-            <div class="reco-desc" style="margin-top:4px;">${esc(v.analysis).substring(0,80)}${v.analysis.length>80?'...':''}</div>
-            <button class="reco-add-btn" style="margin-top:6px;" onclick="addRecoVideo(${i})">加入视频库</button>
-          </div>`;
-        }).join('');
-    }
+  /* 爆款视频 */
+  if(dailyData.videos&&dailyData.videos.length>0&&!synced.video){
+    dailyData.videos.forEach(v=>{
+      if(!store.videos.some(x=>x.title===v.title&&x.date===today)){
+        store.videos.unshift({title:v.title,creator:v.creator,platform:v.platform,likes:v.likes,views:v.views,collects:v.collects,analysis:v.analysis,stars:v.stars,date:today,ts:Date.now()+Math.random()});
+      }
+    });
+    synced.video=true;changed=true;
   }
-}
 
-/* 一键将推荐内容添加到用户数据 */
-function addRecoWord(i){
-  const w=dailyData.words[i];
-  if(store.words.some(x=>x.word===w.word&&x.date===todayStr())){alert('这个单词今天已经添加过了~');return;}
-  store.words.unshift({word:w.word,trans:w.trans,date:todayStr(),ts:Date.now()});
-  saveStore();renderEnglish();renderDashboard();
-  alert('已加入单词本！🎀');
-}
-function addRecoReading(i){
-  const r=dailyData.readings[i];
-  store.readings.unshift({book:r.book,pages:r.pages,note:r.note,date:todayStr(),ts:Date.now()});
-  saveStore();renderReading();renderDashboard();
-  alert('已记录阅读！📖');
-}
-function addRecoFinance(i){
-  const f=dailyData.finances[i];
-  store.finances.unshift({title:f.title,category:f.category,content:f.content,date:todayStr(),ts:Date.now()});
-  saveStore();renderFinance();renderDashboard();
-  alert('已保存笔记！💰');
-}
-function addRecoMedia(i){
-  const m=dailyData.medias[i];
-  store.medias.unshift({title:m.title,platform:m.platform,status:m.status,date:todayStr(),ts:Date.now()});
-  saveStore();renderMedia();
-  alert('已加入计划！📱');
-}
-function addRecoVideo(i){
-  const v=dailyData.videos[i];
-  store.videos.unshift({title:v.title,creator:v.creator,platform:v.platform,likes:v.likes,views:v.views,collects:v.collects,analysis:v.analysis,stars:v.stars,date:todayStr(),ts:Date.now()});
-  saveStore();renderVideo();
-  alert('已加入视频库！🎬');
+  if(changed){
+    store.dailySynced[today]=synced;
+    // 清理7天前的同步记录
+    const weekAgo=new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+    Object.keys(store.dailySynced).forEach(d=>{
+      if(d<weekAgo) delete store.dailySynced[d];
+    });
+    saveStore();
+    renderAll();
+  }
 }
 
 /* 兜底数据 */
