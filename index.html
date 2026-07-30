@@ -682,8 +682,8 @@ input[type="range"]::-webkit-slider-thumb{
 }
 @media(max-width:600px){
   :root{--sidebar-w:100%;}
-  html,body{height:100% !important;overflow:hidden !important;}
-  body{flex-direction:column !important;}
+  html,body{height:auto !important;overflow:visible !important;overflow-x:hidden !important;}
+  body{flex-direction:column !important;display:block !important;}
   .sidebar{
     width:100% !important;
     min-width:100% !important;
@@ -695,9 +695,10 @@ input[type="range"]::-webkit-slider-thumb{
     border-right:none !important;
     border-bottom:2px solid var(--pink-200);
     display:block !important;
-    align-items:stretch !important;
-    flex-shrink:0 !important;
     box-shadow:0 2px 12px rgba(255,107,157,.15) !important;
+    position:sticky !important;
+    top:0 !important;
+    z-index:100 !important;
   }
   .sidebar::after{display:none !important;}
   .sidebar-header{display:none !important;}
@@ -709,10 +710,7 @@ input[type="range"]::-webkit-slider-thumb{
     margin:0 !important;
     overflow:visible !important;
   }
-  .nav-list li{
-    margin:0 !important;
-    list-style:none !important;
-  }
+  .nav-list li{margin:0 !important;list-style:none !important;}
   .nav-item{
     flex-direction:column !important;
     padding:8px 4px !important;
@@ -732,7 +730,7 @@ input[type="range"]::-webkit-slider-thumb{
   .nav-item .icon{font-size:18px !important;margin:0 !important;width:auto !important;}
   .nav-item .badge{position:absolute !important;top:2px !important;right:6px !important;font-size:9px;padding:0 4px;margin:0 !important;}
   .sidebar-footer{display:none !important;}
-  .main{height:auto !important;flex:1 !important;padding:14px !important;width:100%;overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;}
+  .main{height:auto !important;flex:none !important;padding:14px !important;width:100%;overflow:visible !important;}
 }
 /* 自定义图标 */
 .nav-item .icon img, .nav-item img.icon{
